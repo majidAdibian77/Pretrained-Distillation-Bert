@@ -3,6 +3,7 @@ import re
 import string
 from tqdm import tqdm
 
+
 def read_data(config):
     with open(config["data"]["corpus_path"]) as f:
         data = f.readlines()
