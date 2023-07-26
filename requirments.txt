@@ -1,0 +1,3 @@
+pip3 install torch torchvision torchaudio
+pip install hazm
+pip install transformers[torch]
