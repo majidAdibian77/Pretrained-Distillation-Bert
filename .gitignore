@@ -1,8 +1,8 @@
 
 dataset/raw_data/03_wiki_normalized_tokenized_word_neighbouring.txt
-dataset/preprocessed_data/wiki_data.txt
+dataset/tokenized_data/wiki_data.pt
 
-output/log/*
-output/model/*
+output/pretrain_log/*
+output/pretrained_model/*
 
 __pycache__/*

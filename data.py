@@ -7,7 +7,7 @@ from tqdm import tqdm
 def read_data(path):
     with open(path) as f:
         data = f.readlines()
-    return data[:1000]
+    return data
 
 def cleaner(text, types):
     if "english" in types:
@@ -57,13 +57,15 @@ def save_processed_pretraining_data(data, config):
 def load_processed_pretraining_data(tokenizer, config):
     processed_data = []
     with open(config["data"]["processed_path"]) as f:
-        line = f.readline()
-        if line[0] != "=":
-            processed_data.append(line)
-    processed_data = [
-        [tokenizer.convert_tokens_to_ids(tokenizer.tokenize(sent)) for sent in doc]
-        for doc in processed_data
-    ]
+        lines = f.readlines()
+        doc = []
+        for line in tqdm(lines):
+            if line[0] != "=":
+                tokens = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(line)) 
+                doc.append(tokens)
+            else:
+                processed_data.append(doc)
+                doc = []
     return processed_data
 
 def tokenize_ditillation_data(data, student_tokenizer, teacher_tokenizer):

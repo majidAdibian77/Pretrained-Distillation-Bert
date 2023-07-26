@@ -2,9 +2,9 @@
 pretrain:
   data:
     corpus_path: "dataset/raw_data/03_wiki_normalized_tokenized_word_neighbouring.txt"
-    processed_path: "dataset/processed_data/wiki_data.txt"
+    tokenized_path: "dataset/tokenized_data/wiki_data.pt"
     max_input_tokens: 512
-    short_seq_prob: 0.2
+    short_seq_prob: 0.5
     next_sentence_prob: 0.5
     mask_prob: 0.15
 
@@ -18,17 +18,20 @@ pretrain:
     save_paths: "output/tokenizer"
 
   train:
-    device: "cpu"
+    device: "cuda:0"
     val_size: 128
-    batch_size: 16
+    batch_size: 32
     learning_rate: 0.0001
     weight_decay: 0.0001
-    num_train_epochs: 200
-    save_step: 1000
-    val_steps: 100
+    num_train_epochs: 100
+    save_step: 50000
+    val_steps: 500
     log_step: 100
     ckpt_path: "output/pretrained_model"
     log_path: "output/pretrain_log"
+  
+  inference:
+    device: "cuda:0"
 
 
 distillation:
@@ -47,9 +50,9 @@ distillation:
     learning_rate: 0.0001
     weight_decay: 0.0001
     temperature: 2
-    num_train_epochs: 200
-    save_step: 1000
-    val_steps: 100
+    num_train_epochs: 100
+    save_step: 50000
+    val_steps: 500
     log_step: 100
     ckpt_path: "output/distilled_model"
     log_path: "output/distillation_log"

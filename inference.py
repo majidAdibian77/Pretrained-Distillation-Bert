@@ -7,12 +7,12 @@ import yaml
 
 from utils import add_mask
 def infer(args, config):
+    os.environ["CUDA_VISIBLE_DEVICES"]= f"{config['inference']['device'].split(':')[1]}"
 
     model_checkpoint = os.path.join(config["train"]["ckpt_path"], f'checkpoint-{args.restore_step}')
-    # model_checkpoint = f"google/bert_uncased_L-{config['model']['num_layers']}_H-{config['model']['hidden_size']}_A-{config['model']['hidden_size']//64}"
     tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
     model = BertForMaskedLM.from_pretrained(model_checkpoint)
-    model = model.eval().to(config["train"]["device"])
+    model = model.eval().to(config["inference"]["device"])
 
     if args.auto_mask:
         text = add_mask(args.input_text, args.num_mask, tokenizer)
@@ -21,6 +21,7 @@ def infer(args, config):
     print("input text: " + f"{text}")
 
     inputs = tokenizer(text, return_tensors="pt")
+    inputs = {k:v.to(config['inference']['device']) for k,v in inputs.items()}
     mask_token_indexes = torch.where(inputs["input_ids"] == tokenizer.mask_token_id)[1]
     logits = model(**inputs).logits
     mask_token_logits = logits[0, mask_token_indexes, :]
@@ -43,8 +44,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     config = yaml.load(open(args.config_path, "r"), Loader=yaml.FullLoader)
-    infer(args, config)
+    infer(args, config["pretrain"])
 
     """
-    python3 inference.py --config_path "config.yaml" --restore_step 10000 --input_text "بیشتر درامد ایران از است." -auto_mask --num_mask 2
+    python3 inference.py --config_path "config.yaml" --restore_step 50000 --input_text "بیشتر درامد ایران از است." -auto_mask --num_mask 1
     """

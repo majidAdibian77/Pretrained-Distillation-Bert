@@ -1,24 +1,26 @@
 from transformers import DataCollatorForLanguageModeling
 from torch.utils.data import DataLoader
+import torch
+
 import datasets
 import random
 from tqdm import tqdm
 
 
-def MLM_preprocessing(data, tokenizer, config):
+def MLM_preprocessing(tokenizer, config):
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer, mlm=True, mlm_probability=config["data"]["mask_prob"]
     )
     return data_collator
 
 def NSP_preprocessing(documents, tokenizer, config):
-    max_seq_len = config["data"]["max_input_tokens"] - tokenizer.num_special_tokens_to_add(pair=True)
+    max_seq_len = config["data"]["max_input_tokens"] - tokenizer.num_special_tokens_to_add(pair=True) - 10
     input_sentences = []
 
     for doc_id, sentences in tqdm(enumerate(documents)):
         target_seq_length = max_seq_len
         if random.random() < config["data"]["short_seq_prob"]:
-            target_seq_length = random.randint(2, max_seq_len)
+            target_seq_length = random.randint(20, max_seq_len)
         chunk_sents = []  # a buffer stored current working segments
         chunk_length = 0
         i = -1
@@ -59,11 +61,12 @@ def NSP_preprocessing(documents, tokenizer, config):
                     random_doc = documents[random_doc_id]
                     random_start = random.randint(0, len(random_doc)-1)
                     for j in range(random_start, len(random_doc)):
-                        if len(sent_b) + len(random_doc[j]) <= target_sent_b_length:
+                        if len(sent_b) + len(random_doc[j]) < target_sent_b_length:
                             sent_b.extend(random_doc[j])
                         else:
                             break
-                input_sentences.append((sent_a, sent_b, is_next_sent))
+                if len(sent_b) != 0:
+                    input_sentences.append((sent_a, sent_b, is_next_sent))
                 chunk_sents = []
                 chunk_length = 0
 
@@ -83,6 +86,7 @@ def NSP_preprocessing(documents, tokenizer, config):
         data["attention_mask"].append(padded["attention_mask"])
         data["labels"].append(0 if is_next_sent else 1)
     data = datasets.Dataset.from_dict(data)
+    data.set_format("torch", device=config["train"]["device"])
     return data.shuffle()
                 
 def ditillation_data_processing(student_data, teacher_data, student_tokenizer, teacher_tokenizer, config):
@@ -103,4 +107,5 @@ def ditillation_data_processing(student_data, teacher_data, student_tokenizer, t
         data["teacher_input_ids"].append(steacher_padded["teacher_input_ids"])
         data["teacher_attention_mask"].append(steacher_padded["teacher_attention_mask"])
     data = datasets.Dataset.from_dict(data)
+    data.set_format("torch", device=config["train"]["device"])
     return data.shuffle()
