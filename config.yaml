@@ -26,7 +26,7 @@ pretrain:
     num_train_epochs: 100
     save_step: 50000
     val_steps: 500
-    log_step: 100
+    log_step: 500
     ckpt_path: "output/pretrained_model"
     log_path: "output/pretrain_log"
   

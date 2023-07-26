@@ -48,6 +48,7 @@ def main(args, config):
 
         if args.save_tokenized_data:
             print("save dataset object ...")
+            os.makedirs(config["data"]["tokenized_path"], exist_ok=True)
             torch.save(data, config["data"]["tokenized_path"])
 
     mlm_collator = MLM_preprocessing(tokenizer, config)
