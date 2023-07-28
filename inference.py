@@ -38,8 +38,8 @@ if __name__ == "__main__":
     parser.add_argument("--config_path", required=True, type=str, help="path to config")
     parser.add_argument("--restore_step", required=True, type=int, help="model restore step")
     parser.add_argument("--input_text", required=True, type=str, help="input text to test pretrained model")
-    parser.add_argument("-auto_mask", action="store_true", help="replace mask token automatikaly")
-    parser.add_argument("--num_mask", type=int, help="number of mask token mut be added")
+    parser.add_argument("-auto_mask", action="store_true", required=False, help="replace mask token automatikaly")
+    parser.add_argument("--num_mask", type=int, required=False, help="number of mask token mut be added")
 
     args = parser.parse_args()
 
@@ -47,5 +47,6 @@ if __name__ == "__main__":
     infer(args, config["pretrain"])
 
     """
-    python3 inference.py --config_path "config.yaml" --restore_step 50000 --input_text "بیشتر درامد ایران از است." -auto_mask --num_mask 1
+    python3 inference.py --config_path "config.yaml" --restore_step 1000000 --input_text "بیشتر درامد کشور [MASK] از نفت است."
+    python3 inference.py --config_path "config.yaml" --restore_step 1000000 --input_text "بیشتر درامد کشور ایران از نفت است." -auto_mask --num_mask 1
     """
